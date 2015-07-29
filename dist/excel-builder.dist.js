@@ -2928,6 +2928,10 @@ define('Excel/StyleSheet',['underscore', './util'], function (_, util) {
                 var alignmentData = styleInstructions.alignment;
                 xf.appendChild(this.exportAlignment(doc, alignmentData));
             }
+            if (styleInstructions.protection) {
+                xf.appendChild(this.exportProtection(doc, styleInstructions.protection));
+                xf.setAttribute('applyProtection', '1');
+            }
             var a = attributes.length;
             while(a--) {
                 xf.setAttribute(attributes[a], styleInstructions[attributes[a]]);
@@ -3210,6 +3214,14 @@ define('Excel/StyleSheet',['underscore', './util'], function (_, util) {
             tableStyle.setAttribute('count', i);
             return tableStyle;
         },
+
+        exportProtection: function (doc, protectionData) {
+            var node = doc.createElement('protection');
+            for (var k in protectionData) {
+                node.setAttribute(k, protectionData[k]);
+            }
+            return node;
+        },
         
         toXML: function () {
             var doc = util.createXmlDoc(util.schemas.spreadsheetml, 'styleSheet');
@@ -3421,6 +3433,7 @@ define('Excel/Worksheet',['underscore', './util', './RelationshipManager'], func
         this.data = [];
         this.mergedCells = [];
         this.columns = [];
+        this.sheetProtection = false;
         this._headers = [];
         this._footers = [];
         this._tables = [];
@@ -3684,6 +3697,15 @@ define('Excel/Worksheet',['underscore', './util', './RelationshipManager'], func
             
             var cellCache = this._buildCache(doc);
             
+            if (this.sheetProtection) {
+                var shPr = (this.sheetProtection === true) ? {'sheet': '1'} : this.sheetProtection;
+                var shPrNode = doc.createElement('sheetProtection');
+                for (var k in shPr) {
+                    shPrNode.setAttribute(k, shPr[k]);
+                }
+                worksheet.appendChild(shPrNode);
+            }
+
             for(row = 0, l = data.length; row < l; row++) {
                 var dataRow = data[row];
                 var cellCount = dataRow.length;
