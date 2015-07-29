@@ -2520,6 +2520,9 @@ define('Excel/StyleSheet',['underscore', './util'], function (_, util) {
             if(styleInstructions.fontId) {
                 xf.setAttribute('applyFont', '1');
             }
+            if((styleInstructions.numFmtId !== undefined) && (styleInstructions.xfId === undefined)) {
+                xf.setAttribute('xfId', '0');
+            }
             return xf;
         },
         
